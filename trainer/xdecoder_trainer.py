@@ -78,18 +78,20 @@ class XDecoder_Trainer(DefaultTrainer):
 
             flag_continue = False
             for name, param in self.raw_models[_module_name].named_parameters():
-                for ig in ignore_fix:
-                    if ig in name:
-                        flag_continue = True
-                        break
-
-                if flag_continue:
-                    flag_continue = False
-                    continue
-
-                for key, value in fix_param.items():
-                    if key in name and value == True:
-                        param.requires_grad = False
+                if 'adapter' not in name:
+                    param.requires_grad = False
+                # for ig in ignore_fix:
+                #     if ig in name:
+                #         flag_continue = True
+                #         break
+                #
+                # if flag_continue:
+                #     flag_continue = False
+                #     continue
+                #
+                # for key, value in fix_param.items():
+                #     if key in name and value == True:
+                #         param.requires_grad = False
 
         lr_multiplier = self.opt['SOLVER']['LR_MULTIPLIER']
 

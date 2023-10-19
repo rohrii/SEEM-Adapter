@@ -363,7 +363,8 @@ class GeneralizedSEEM(nn.Module):
 
         extra = {'lang_logit': self.sem_seg_head.predictor.lang_encoder.logit_scale,
                  'class_embeddings': getattr(self.sem_seg_head.predictor.lang_encoder, '{}_text_embeddings'.format('default')),
-                 'false_positive_mask': extra['false_positive_mask']}
+                 # 'false_positive_mask': extra['false_positive_mask']
+                 }
         # bipartite matching-based loss
         self.criterion.losses = self.losses['seg'] # seg criterion losses
 
@@ -902,7 +903,7 @@ class GeneralizedSEEM(nn.Module):
             if self.task_switch['mask']:
                 targets_per_image = batch_per_image['instances'].to(self.device)
                 # pad gt
-                gt_masks = targets_per_image.gt_masks.tensor
+                gt_masks = targets_per_image.gt_masks
                 padded_masks = torch.zeros((gt_masks.shape[0], h_pad, w_pad), dtype=gt_masks.dtype, device=gt_masks.device)
                 padded_masks[:, : gt_masks.shape[1], : gt_masks.shape[2]] = gt_masks
 
@@ -914,7 +915,6 @@ class GeneralizedSEEM(nn.Module):
 
                 target_dict.update({
                         "labels": targets_per_image.gt_classes,
-                        "is_things": targets_per_image.is_things,
                         "masks": padded_masks,
                         "boxes": gt_boxes,
                         })

@@ -42,7 +42,7 @@ def align_and_update_state_dicts(model_state_dict, ckpt_state_dict):
             if model_weight.shape == ckpt_weight.shape:
                 result_dicts[model_key] = ckpt_weight
                 ckpt_keys.pop(ckpt_keys.index(model_key))
-                matched_log.append("Loaded {}, Model Shape: {} <-> Ckpt Shape: {}".format(model_key, model_weight.shape, ckpt_weight.shape))
+                # matched_log.append("Loaded {}, Model Shape: {} <-> Ckpt Shape: {}".format(model_key, model_weight.shape, ckpt_weight.shape))
             else:
                 unmatched_log.append("*UNMATCHED* {}, Model Shape: {} <-> Ckpt Shape: {}".format(model_key, model_weight.shape, ckpt_weight.shape))
         else:

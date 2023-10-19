@@ -14,8 +14,6 @@ import itertools
 import detectron2.utils.comm as comm
 from detectron2.evaluation.evaluator import DatasetEvaluator
 
-from caption_pycocotools.coco import COCO
-from pycocoevalcap.eval import COCOEvalCap
 
 
 class CaptioningEvaluator(DatasetEvaluator):
@@ -74,7 +72,7 @@ class CaptioningEvaluator(DatasetEvaluator):
         self._logger = logging.getLogger(__name__)
         self._distributed = distributed
         self._output_dir = output_dir
-        self._gt_json = COCO(gt_json)
+        # self._gt_json = COCO(gt_json)
 
     def reset(self):
         self._gen_captions = []
@@ -123,7 +121,7 @@ class CaptioningEvaluator(DatasetEvaluator):
         gt_captions = self._gt_json
         pred_captions = gt_captions.loadRes(pred_pth)
 
-        cocoEval = COCOEvalCap(gt_captions, pred_captions)
-        cocoEval.params['image_id'] = pred_captions.getImgIds()
-        cocoEval.evaluate()
-        return cocoEval.eval
+        # cocoEval = COCOEvalCap(gt_captions, pred_captions)
+        # cocoEval.params['image_id'] = pred_captions.getImgIds()
+        # cocoEval.evaluate()
+        # return cocoEval.eval

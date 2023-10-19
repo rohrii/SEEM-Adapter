@@ -207,6 +207,8 @@ def get_class_names(name):
         return BDD_PANO + ["background"]
     elif 'vlp' in name:
         return ["background"]
+    elif 'table_tennis' in name:
+        return TABLE_TENNIS_CLASSES + ["background"]
     else:
         assert False, "text dataset name {} is not defined".format(name)
 

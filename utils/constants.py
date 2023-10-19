@@ -113,3 +113,5 @@ PASCAL_CLASSES = [
     "chair", "cow", "diningtable", "dog", "horse", "motorbike", "person",
     "pottedplant", "sheep", "sofa", "train", "tvmonitor"
 ]
+
+TABLE_TENNIS_CLASSES = ["ball", "left", "right", "paddle", "player", "referee"]

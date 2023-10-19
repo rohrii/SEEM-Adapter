@@ -10,6 +10,8 @@ from typing import Optional
 import torch
 from torch import nn, Tensor
 from torch.nn import functional as F
+from transformers.adapters import AdapterConfig
+from transformers.adapters.modeling import Adapter
 
 from timm.models.layers import trunc_normal_
 from detectron2.layers import Conv2d
@@ -108,6 +110,13 @@ class SEEMDecoder(nn.Module):
             )
 
         self.decoder_norm = nn.LayerNorm(hidden_dim)
+
+        self.decoder_adapter = Adapter(
+            adapter_name="pfeiffer",
+            config=AdapterConfig.load("pfeiffer"),
+            input_size=hidden_dim,
+            down_sample=hidden_dim // 4,
+        )
 
         self.num_queries = num_queries
         # learnable query features
@@ -341,6 +350,9 @@ class SEEMDecoder(nn.Module):
             output = self.transformer_ffn_layers[i](
                 output
             )
+
+            # ADAPTER
+            output, *_ = self.decoder_adapter(output, residual_input=output)
 
             self.attention_data.update_variables(output, 'self_attn')
             output, query_embed = self.attention_data.cross_attn_variables()

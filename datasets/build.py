@@ -37,11 +37,11 @@ from detectron2.evaluation import (
 from fvcore.common.config import CfgNode
 
 from .dataset_mappers import *
+from .dataset_mappers.table_tennis_dataset_mapper import TableTennisDatasetMapper
 from .evaluation import (InstanceSegEvaluator, 
                          ClassificationEvaluator, 
                          SemSegEvaluator, 
                          RetrievalEvaluator, 
-                         CaptioningEvaluator, 
                          COCOPanopticEvaluator,
                          GroundingEvaluator,
                          InteractiveEvaluator,
@@ -391,6 +391,9 @@ def get_config_from_name(cfg, dataset_name):
     elif 'sam' in dataset_name:
         cfg.update(cfg['SAM'])
         return cfg
+    elif 'table_tennis' in dataset_name:
+        cfg.update(cfg['TABLETENNIS'])
+        return cfg
     else:
         assert False, "dataset not support."
 
@@ -416,6 +419,8 @@ def build_eval_dataloader(cfg, ):
             mapper = SunRGBDSegDatasetMapper(cfg, False)
         elif 'refcoco' in dataset_name:
             mapper = RefCOCODatasetMapper(cfg, False)
+        elif 'table_tennis' in dataset_name:
+            mapper = TableTennisDatasetMapper(cfg, False)
         else:
             mapper = None
         dataloaders += [build_detection_test_loader(cfg, dataset_name, mapper=mapper)]
@@ -458,6 +463,9 @@ def build_train_dataloader(cfg, ):
         elif mapper_name == "coco_interactive":
             mapper = COCOPanopticInteractiveDatasetMapper(cfg, True)
             loaders['coco'] = build_detection_train_loader(cfg, dataset_name=dataset_name, mapper=mapper)
+        elif mapper_name == "table_tennis":
+            mapper = TableTennisDatasetMapper(cfg, True)
+            loaders['coco'] = build_detection_train_loader(cfg, dataset_name=dataset_name, mapper=mapper)
         else:
             mapper = None
             loaders[dataset_name] = build_detection_train_loader(cfg, dataset_name=dataset_name, mapper=mapper)
@@ -490,6 +498,7 @@ def build_evaluator(cfg, dataset_name, output_folder=None):
                 output_dir=output_folder,
             )
         )
+
     # instance segmentation
     if evaluator_type == "coco":
         evaluator_list.append(COCOEvaluator(dataset_name, output_dir=output_folder))
@@ -553,8 +562,6 @@ def build_evaluator(cfg, dataset_name, output_folder=None):
     # Retrieval
     if evaluator_type in ["retrieval"]:
         evaluator_list.append(RetrievalEvaluator(dataset_name, output_folder, cfg['MODEL']['DECODER']['RETRIEVAL']['ENSEMBLE']))
-    if evaluator_type == "captioning":
-        evaluator_list.append(CaptioningEvaluator(dataset_name, output_folder, MetadataCatalog.get(dataset_name).gt_json))
     if evaluator_type in ["grounding_refcoco", "grounding_phrasecut", "grounding_spatial", "grounding_entity"]:
         evaluator_list.append(GroundingEvaluator(dataset_name))
     # Interactive

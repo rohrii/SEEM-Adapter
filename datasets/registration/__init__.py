@@ -15,4 +15,5 @@ from . import (
     register_scannet_panoptic,
     register_bdd100k_panoseg,
     register_pascalvoc_eval,
+    register_table_tennis_instance_dataset
 )
