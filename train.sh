@@ -1,4 +1,4 @@
-CUDA_VISIBLE_DEVICES=1 mpirun --cpu-set 0-9 --bind-to core -n 1 python entry.py train \
+CUDA_LAUNCH_BLOCKING=1 CUDA_VISIBLE_DEVICES=1 mpirun --cpu-set 0-2 --bind-to core -n 1 python entry.py train \
             --conf_files configs/seem/focalt_unicl_lang_v1.yaml \
             --overrides \
             MODEL.DECODER.HIDDEN_DIM 512 \
@@ -11,5 +11,5 @@ CUDA_VISIBLE_DEVICES=1 mpirun --cpu-set 0-9 --bind-to core -n 1 python entry.py 
             SOLVER.BASE_LR 0.0001 \
             ATTENTION_ARCH.QUERY_NUMBER 3 \
             WEIGHT True \
-            RESUME_FROM output/focalt_unicl_lang_v1.yaml_conf~/run_5/00001405/default/model_state_dict.pt \
+            RESUME_FROM seem_focalt_v1.pt \
             WANDB True

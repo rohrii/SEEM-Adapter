@@ -55,10 +55,12 @@ def build_transform_gen(cfg, is_train):
             )
         )
 
-    augmentation.extend([
-        T.ResizeScale(
+    if is_train:
+        augmentation.append(T.ResizeScale(
             min_scale=min_scale, max_scale=max_scale, target_height=image_size, target_width=image_size
-        ),
+        ))
+
+    augmentation.extend([
         T.Resize(image_size),
     ])
 

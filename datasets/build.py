@@ -399,6 +399,7 @@ def get_config_from_name(cfg, dataset_name):
         return cfg
     elif 'pan_nuke' in dataset_name:
         cfg.update(cfg["PAN_NUKE"])
+        return cfg
     else:
         assert False, "dataset not support."
 
