@@ -14,3 +14,4 @@ from .refcoco_dataset_mapper import RefCOCODatasetMapper
 from .pascalvoc_dataset_mapper_ix import PascalVOCSegDatasetMapperIX
 from .table_tennis_dataset_mapper import TableTennisDatasetMapper
 from .chestx_dataset_mapper import ChestXDatasetMapper
+from .pan_nuke_dataset_mapper import PanNukeDatasetMapper

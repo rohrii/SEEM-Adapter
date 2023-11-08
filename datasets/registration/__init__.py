@@ -16,5 +16,6 @@ from . import (
     register_bdd100k_panoseg,
     register_pascalvoc_eval,
     register_table_tennis_instance_dataset,
-    register_chestx_instance_dataset
+    register_chestx_instance_dataset,
+    register_pan_nuke
 )

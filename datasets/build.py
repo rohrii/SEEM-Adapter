@@ -397,6 +397,8 @@ def get_config_from_name(cfg, dataset_name):
     elif 'chestx' in dataset_name:
         cfg.update(cfg['CHESTX'])
         return cfg
+    elif 'pan_nuke' in dataset_name:
+        cfg.update(cfg["PAN_NUKE"])
     else:
         assert False, "dataset not support."
 
@@ -426,6 +428,8 @@ def build_eval_dataloader(cfg, ):
             mapper = TableTennisDatasetMapper(cfg, False)
         elif 'chestx' in dataset_name:
             mapper = ChestXDatasetMapper(cfg, False)
+        elif 'pan_nuke' in dataset_name:
+            mapper = PanNukeDatasetMapper(cfg, False)
         else:
             mapper = None
         dataloaders += [build_detection_test_loader(cfg, dataset_name, mapper=mapper)]
@@ -473,6 +477,9 @@ def build_train_dataloader(cfg, ):
             loaders['coco'] = build_detection_train_loader(cfg, dataset_name=dataset_name, mapper=mapper)
         elif mapper_name == "chestx":
             mapper = ChestXDatasetMapper(cfg, True)
+            loaders['coco'] = build_detection_train_loader(cfg, dataset_name=dataset_name, mapper=mapper)
+        elif mapper_name == "pan_nuke":
+            mapper = PanNukeDatasetMapper(cfg, True)
             loaders['coco'] = build_detection_train_loader(cfg, dataset_name=dataset_name, mapper=mapper)
         else:
             mapper = None

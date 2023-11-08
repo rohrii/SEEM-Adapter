@@ -209,6 +209,10 @@ def get_class_names(name):
         return ["background"]
     elif 'table_tennis' in name:
         return TABLE_TENNIS_CLASSES + ["background"]
+    elif 'chestx' in name:
+        return CHEST_X_CLASSES + ["background"]
+    elif 'pan_nuke' in name:
+        return PAN_NUKE_CLASSES + ["background"]
     else:
         assert False, "text dataset name {} is not defined".format(name)
 

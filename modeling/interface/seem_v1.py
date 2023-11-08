@@ -80,6 +80,7 @@ class SEEMDecoder(nn.Module):
         self.transformer_self_attention_layers = nn.ModuleList()
         self.transformer_cross_attention_layers = nn.ModuleList()
         self.transformer_ffn_layers = nn.ModuleList()
+        self.decoder_adapter_layers = nn.ModuleList()
 
         for _ in range(self.num_layers):
             self.transformer_self_attention_layers.append(
@@ -100,6 +101,15 @@ class SEEMDecoder(nn.Module):
                 )
             )
 
+            self.decoder_adapter_layers.append(
+                Adapter(
+                    adapter_name="pfeiffer",
+                    config=AdapterConfig.load("pfeiffer"),
+                    input_size=hidden_dim,
+                    down_sample=hidden_dim // 4,
+                )
+            )
+
             self.transformer_ffn_layers.append(
                 FFNLayer(
                     d_model=hidden_dim,
@@ -110,13 +120,6 @@ class SEEMDecoder(nn.Module):
             )
 
         self.decoder_norm = nn.LayerNorm(hidden_dim)
-
-        self.decoder_adapter = Adapter(
-            adapter_name="pfeiffer",
-            config=AdapterConfig.load("pfeiffer"),
-            input_size=hidden_dim,
-            down_sample=hidden_dim // 4,
-        )
 
         self.num_queries = num_queries
         # learnable query features
@@ -341,18 +344,18 @@ class SEEMDecoder(nn.Module):
 
             output, query_embed, self_attn_mask = self.attention_data.self_attn(bs, self.num_heads)
 
-            output = self.transformer_self_attention_layers[i](
+            output_att = self.transformer_self_attention_layers[i](
                 output, tgt_mask=self_attn_mask,
                 tgt_key_padding_mask=None,
                 query_pos=query_embed)
+
+            # ADAPTER
+            output, *_ = self.decoder_adapter_layers[i](output_att, residual_input=output_att)
 
             # FFN
             output = self.transformer_ffn_layers[i](
                 output
             )
-
-            # ADAPTER
-            output, *_ = self.decoder_adapter(output, residual_input=output)
 
             self.attention_data.update_variables(output, 'self_attn')
             output, query_embed = self.attention_data.cross_attn_variables()

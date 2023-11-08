@@ -17,6 +17,7 @@ from mpi4py import MPI
 
 import numpy as np
 import torch
+from prettytable import PrettyTable
 from torch.utils.data import DataLoader
 
 from detectron2.projects.deeplab import build_lr_scheduler
@@ -78,22 +79,25 @@ class XDecoder_Trainer(DefaultTrainer):
 
             flag_continue = False
             for name, param in self.raw_models[_module_name].named_parameters():
-                if 'adapter' not in name:
-                    param.requires_grad = False
-                # for ig in ignore_fix:
-                #     if ig in name:
-                #         flag_continue = True
-                #         break
-                #
-                # if flag_continue:
-                #     flag_continue = False
-                #     continue
-                #
-                # for key, value in fix_param.items():
-                #     if key in name and value == True:
-                #         param.requires_grad = False
+
+                for ig in ignore_fix:
+                    if ig in name:
+                        flag_continue = True
+                        break
+
+                if flag_continue:
+                    flag_continue = False
+                    continue
+
+                for key, value in fix_param.items():
+                    if key in name and value == True:
+                        param.requires_grad = False
 
         lr_multiplier = self.opt['SOLVER']['LR_MULTIPLIER']
+
+        table = PrettyTable(["Model name", "Module name","Param Name", "# Parameters"])
+        num_trained_params = 0
+        num_frozen_params = 0
 
         for _module_name in self.model_names:
             # parameters = self.raw_models[module_name].get_training_parameters()
@@ -105,7 +109,12 @@ class XDecoder_Trainer(DefaultTrainer):
             for module_name, module in self.raw_models[_module_name].named_modules():
                 for module_param_name, value in module.named_parameters(recurse=False):
                     if not value.requires_grad:
+                        num_frozen_params += value.numel()
                         continue
+
+                    table.add_row([_module_name, module_name, module_param_name, value.numel()])
+                    num_trained_params += value.numel()
+
                     # Avoid duplicating parameters
                     if value in memo:
                         continue
@@ -163,6 +172,13 @@ class XDecoder_Trainer(DefaultTrainer):
             
             self.optimizers[_module_name] = optimizer
             self.optimizers[_module_name].zero_grad()
+
+        num_total_params = num_trained_params + num_frozen_params
+        logger.info(f"TRAINABLE PARAMS SUMMARY:\n"
+                    f"Total parameters: {num_total_params}\n"
+                    f"Sum of trained parameters: {num_trained_params} ({round((num_trained_params / num_total_params) * 100, 2)}%)\n"
+                    f"Sum of frozen parameters: {num_frozen_params} ({round((num_frozen_params / num_total_params) * 100, 2)}%)\n"
+                    f"{table}")
 
         num_epoch = self.opt['SOLVER']['MAX_NUM_EPOCHS']
         cfg_solver['MAX_ITER'] = num_epoch * self.train_params['updates_per_epoch']

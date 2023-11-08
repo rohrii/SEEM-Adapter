@@ -70,7 +70,7 @@ def main(args=None):
             init_wandb(
                 args=opt,
                 job_dir=trainer.save_folder,
-                job_name=f"{trainer.save_folder}_{os.environ['DATASET_NAME']}",
+                job_name=f"{os.environ['EXP_NAME']}__{trainer.save_folder.split('/')[-1]}",
                 project=os.environ['WANDB_PROJECT']
             )
         trainer.train()

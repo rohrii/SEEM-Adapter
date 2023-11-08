@@ -13,7 +13,7 @@ from pycocotools import mask as coco_mask
 
 from modeling.utils import configurable
 
-__all__ = ["ChestXDatasetMapper"]
+__all__ = ["PanNukeDatasetMapper"]
 
 
 def convert_coco_poly_to_mask(segmentations, height, width):
@@ -42,6 +42,8 @@ def build_transform_gen(cfg, is_train):
     """
     cfg_input = cfg['INPUT']
     image_size = cfg_input['IMAGE_SIZE']
+    min_scale = cfg_input['MIN_SCALE']
+    max_scale = cfg_input['MAX_SCALE']
 
     augmentation = []
 
@@ -54,6 +56,9 @@ def build_transform_gen(cfg, is_train):
         )
 
     augmentation.extend([
+        T.ResizeScale(
+            min_scale=min_scale, max_scale=max_scale, target_height=image_size, target_width=image_size
+        ),
         T.Resize(image_size),
     ])
 
@@ -61,7 +66,7 @@ def build_transform_gen(cfg, is_train):
 
 
 # This is specifically designed for the COCO dataset.
-class ChestXDatasetMapper:
+class PanNukeDatasetMapper:
     """
     A callable which takes a dataset dict in Detectron2 Dataset format,
     and map it into a format used by MaskFormer.
@@ -94,7 +99,7 @@ class ChestXDatasetMapper:
         """
         self.tfm_gens = tfm_gens
         logging.getLogger(__name__).info(
-            "[ChestXDatasetMapper] Full TransformGens used in training: {}".format(str(self.tfm_gens))
+            "[Pan Nuke DatasetMapper] Full TransformGens used: {}".format(str(self.tfm_gens))
         )
 
         self.img_format = image_format

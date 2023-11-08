@@ -14,6 +14,8 @@ from typing import List, Optional
 import torch
 import torch.nn.functional as F
 from torch import Tensor, nn
+from transformers.adapters import AdapterConfig
+from transformers.adapters.modeling import Adapter
 
 
 class Transformer(nn.Module):
@@ -163,6 +165,14 @@ class TransformerEncoderLayer(nn.Module):
     ):
         super().__init__()
         self.self_attn = nn.MultiheadAttention(d_model, nhead, dropout=dropout)
+
+        self.pixel_decoder_adapter = Adapter(
+            adapter_name="pfeiffer",
+            config=AdapterConfig.load("pfeiffer"),
+            input_size=d_model,
+            down_sample=d_model // 4,
+        )
+
         # Implementation of Feedforward model
         self.linear1 = nn.Linear(d_model, dim_feedforward)
         self.dropout = nn.Dropout(dropout)
@@ -191,6 +201,10 @@ class TransformerEncoderLayer(nn.Module):
         src2 = self.self_attn(
             q, k, value=src, attn_mask=src_mask, key_padding_mask=src_key_padding_mask
         )[0]
+
+        # FPN ENCODER ADAPTER
+        self.pixel_decoder_adapter(src2, residual_input=src2)
+
         src = src + self.dropout1(src2)
         src = self.norm1(src)
         src2 = self.linear2(self.dropout(self.activation(self.linear1(src))))

@@ -115,3 +115,8 @@ PASCAL_CLASSES = [
 ]
 
 TABLE_TENNIS_CLASSES = ["ball", "left", "right", "paddle", "player", "referee"]
+
+CHEST_X_CLASSES = ["Atelectasis", "Calcification", "Cardiomegaly", "Consolidation", "Diffuse Nodule", "Effusion",
+                   "Emphysema", "Fibrosis", "Fracture", "Mass", "Nodule", "Pleural Thickening", "Pneumothorax"]
+
+PAN_NUKE_CLASSES = ["neoplastic","inflammatory","softtissue","dead","epithelial"]
