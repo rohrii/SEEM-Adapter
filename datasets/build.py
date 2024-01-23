@@ -400,6 +400,18 @@ def get_config_from_name(cfg, dataset_name):
     elif 'pan_nuke' in dataset_name:
         cfg.update(cfg["PAN_NUKE"])
         return cfg
+    elif 'trashcan' in dataset_name:
+        cfg.update(cfg["TRASHCAN"])
+        return cfg
+    elif 'dolphin' in dataset_name:
+        cfg.update(cfg["DOLPHIN"])
+        return cfg
+    elif 'zerowaste' in dataset_name:
+        cfg.update(cfg["ZEROWASTE"])
+        return cfg
+    elif 'xray-waste' in dataset_name:
+        cfg.update(cfg["XRAY_WASTE"])
+        return cfg
     else:
         assert False, "dataset not support."
 
@@ -431,6 +443,14 @@ def build_eval_dataloader(cfg, ):
             mapper = ChestXDatasetMapper(cfg, False)
         elif 'pan_nuke' in dataset_name:
             mapper = PanNukeDatasetMapper(cfg, False)
+        elif 'trashcan' in dataset_name:
+            mapper = TrashcanDatasetMapper(cfg, False)
+        elif 'dolphin' in dataset_name:
+            mapper = DolphinDatasetMapper(cfg, False)
+        elif 'zerowaste' in dataset_name:
+            mapper = ZerowasteDatasetMapper(cfg, False)
+        elif 'xray-waste' in dataset_name:
+            mapper = XrayWasteDatasetMapper(cfg, False)
         else:
             mapper = None
         dataloaders += [build_detection_test_loader(cfg, dataset_name, mapper=mapper)]
@@ -481,6 +501,18 @@ def build_train_dataloader(cfg, ):
             loaders['coco'] = build_detection_train_loader(cfg, dataset_name=dataset_name, mapper=mapper)
         elif mapper_name == "pan_nuke":
             mapper = PanNukeDatasetMapper(cfg, True)
+            loaders['coco'] = build_detection_train_loader(cfg, dataset_name=dataset_name, mapper=mapper)
+        elif mapper_name == "trashcan":
+            mapper = TrashcanDatasetMapper(cfg, True)
+            loaders['coco'] = build_detection_train_loader(cfg, dataset_name=dataset_name, mapper=mapper)
+        elif mapper_name == "dolphin":
+            mapper = DolphinDatasetMapper(cfg, True)
+            loaders['coco'] = build_detection_train_loader(cfg, dataset_name=dataset_name, mapper=mapper)
+        elif mapper_name == "zerowaste":
+            mapper = ZerowasteDatasetMapper(cfg, True)
+            loaders['coco'] = build_detection_train_loader(cfg, dataset_name=dataset_name, mapper=mapper)
+        elif mapper_name == "xray-waste":
+            mapper = XrayWasteDatasetMapper(cfg, True)
             loaders['coco'] = build_detection_train_loader(cfg, dataset_name=dataset_name, mapper=mapper)
         else:
             mapper = None
@@ -537,7 +569,7 @@ def build_evaluator(cfg, dataset_name, output_folder=None):
     if (evaluator_type == "coco_panoptic_seg" and cfg_model_decoder_test["SEMANTIC_ON"]) or evaluator_type == "coco_sem_seg":
         evaluator_list.append(SemSegEvaluator(dataset_name, distributed=True, output_dir=output_folder))
     # Mapillary Vistas
-    if evaluator_type == "mapillary_vistas_panoptic_seg" and cfg_model_decoder_test["INSTANCE_ON"]:
+    if evaluator_type == "coco_instance" and cfg_model_decoder_test["INSTANCE_ON"]:
         evaluator_list.append(InstanceSegEvaluator(dataset_name, output_dir=output_folder))
     if evaluator_type == "mapillary_vistas_panoptic_seg" and cfg_model_decoder_test["SEMANTIC_ON"]:
         evaluator_list.append(SemSegEvaluator(dataset_name, distributed=True, output_dir=output_folder))

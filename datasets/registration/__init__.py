@@ -17,5 +17,9 @@ from . import (
     register_pascalvoc_eval,
     register_table_tennis_instance_dataset,
     register_chestx_instance_dataset,
-    register_pan_nuke
+    register_pan_nuke,
+    register_trashcan,
+    register_dolphin_instance,
+    register_zerowaste_instance,
+    register_xray_waste_instance,
 )

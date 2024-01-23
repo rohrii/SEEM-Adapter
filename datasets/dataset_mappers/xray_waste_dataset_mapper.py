@@ -13,7 +13,7 @@ from pycocotools import mask as coco_mask
 
 from modeling.utils import configurable
 
-__all__ = ["PanNukeDatasetMapper"]
+__all__ = ["XrayWasteDatasetMapper"]
 
 def convert_coco_poly_to_mask(segmentations, height, width):
     masks = []
@@ -67,7 +67,7 @@ def build_transform_gen(cfg, is_train):
 
 
 # This is specifically designed for the COCO dataset.
-class PanNukeDatasetMapper:
+class XrayWasteDatasetMapper:
     """
     A callable which takes a dataset dict in Detectron2 Dataset format,
     and map it into a format used by SEEM.
@@ -84,7 +84,7 @@ class PanNukeDatasetMapper:
     ):
         self.tfm_gens = tfm_gens
         logging.getLogger(__name__).info(
-            "[Pan Nuke DatasetMapper] Full TransformGens used: {}".format(str(self.tfm_gens))
+            "[Xray Waste DatasetMapper] Full TransformGens used: {}".format(str(self.tfm_gens))
         )
 
         self.img_format = image_format
@@ -120,6 +120,7 @@ class PanNukeDatasetMapper:
         padding_mask = np.ones(image.shape[:2], dtype="uint8")
 
         image, transforms = T.apply_transform_gens(self.tfm_gens, image)
+
         # the crop transformation has default padding value 0 for segmentation
         padding_mask = transforms.apply_segmentation(padding_mask)
         padding_mask = ~ padding_mask.astype(bool)

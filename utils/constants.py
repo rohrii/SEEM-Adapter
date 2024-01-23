@@ -120,3 +120,11 @@ CHEST_X_CLASSES = ["Atelectasis", "Calcification", "Cardiomegaly", "Consolidatio
                    "Emphysema", "Fibrosis", "Fracture", "Mass", "Nodule", "Pleural Thickening", "Pneumothorax"]
 
 PAN_NUKE_CLASSES = ["neoplastic","inflammatory","softtissue","dead","epithelial"]
+
+TRASHCAN_CLASSES = ["rov", "plant", "animal_fish", "animal_starfish", "animal_shells", "animal_crab", "animal_eel", "animal_etc", "trash_clothing", "trash_pipe", "trash_bottle", "trash_bag", "trash_snack_wrapper", "trash_can", "trash_cup", "trash_container", "trash_unknown_instance", "trash_branch", "trash_wreckage", "trash_tarp", "trash_rope", "trash_net"]
+
+DOLPHIN_CLASSES = ["dolphin"]
+
+ZEROWASTE_CLASSES = ["cardboard", "metal", "rigid_plastic", "soft_plastic"]
+
+XRAY_WASTE_CLASSES = ["Recyclabel_PlasticBottle", "ResidualWaste_MealBox", "Recyclabel_Can", "Recyclabel_Carton", "Recyclabel_Glassbottle", "Recyclabel_Stick", "FoodWaste", "Recyclabel_Tableware", "ResidualWaste_HeatingPad", "ResidualWaste_Desiccant", "HazardousWaste_Battery", "HazardousWaste_Bulb"]
