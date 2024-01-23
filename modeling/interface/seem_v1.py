@@ -47,6 +47,9 @@ class SEEMDecoder(nn.Module):
         enforce_input_project: bool,
         max_spatial_len: int,
         attn_arch: dict,
+        use_adapters: bool,
+        adapter_downscale: int,
+        adapter_num: int,
     ):
         """
         NOTE: this interface is experimental.
@@ -80,7 +83,6 @@ class SEEMDecoder(nn.Module):
         self.transformer_self_attention_layers = nn.ModuleList()
         self.transformer_cross_attention_layers = nn.ModuleList()
         self.transformer_ffn_layers = nn.ModuleList()
-        self.decoder_adapter_layers = nn.ModuleList()
 
         for _ in range(self.num_layers):
             self.transformer_self_attention_layers.append(
@@ -89,6 +91,9 @@ class SEEMDecoder(nn.Module):
                     nhead=nheads,
                     dropout=0.0,
                     normalize_before=pre_norm,
+                    use_adapter=use_adapters,
+                    adapter_downscale=adapter_downscale,
+                    adapter_num=adapter_num
                 )
             )
 
@@ -98,15 +103,9 @@ class SEEMDecoder(nn.Module):
                     nhead=nheads,
                     dropout=0.0,
                     normalize_before=pre_norm,
-                )
-            )
-
-            self.decoder_adapter_layers.append(
-                Adapter(
-                    adapter_name="pfeiffer",
-                    config=AdapterConfig.load("pfeiffer"),
-                    input_size=hidden_dim,
-                    down_sample=hidden_dim // 4,
+                    use_adapter=use_adapters,
+                    adapter_downscale=adapter_downscale,
+                    adapter_num=adapter_num
                 )
             )
 
@@ -207,6 +206,11 @@ class SEEMDecoder(nn.Module):
 
         # attn data struct
         ret["attn_arch"] = cfg['ATTENTION_ARCH']
+
+        # use adapters
+        ret["use_adapters"] = cfg['USE_ADAPTERS']
+        ret["adapter_downscale"] = cfg["ADAPTER_DOWNSCALE_FACTOR"]
+        ret["adapter_num"] = cfg["ADAPTER_NUM"]
 
         return ret
 
@@ -329,6 +333,7 @@ class SEEMDecoder(nn.Module):
                 memory_key_padding_mask=None,  # here we do not apply masking on padded region
                 pos=pos[level_index], query_pos=query_embed
             )
+
             self.attention_data.update_variables(output, 'cross_attn')
 
             # SELF ATTENTION
@@ -344,13 +349,10 @@ class SEEMDecoder(nn.Module):
 
             output, query_embed, self_attn_mask = self.attention_data.self_attn(bs, self.num_heads)
 
-            output_att = self.transformer_self_attention_layers[i](
+            output = self.transformer_self_attention_layers[i](
                 output, tgt_mask=self_attn_mask,
                 tgt_key_padding_mask=None,
                 query_pos=query_embed)
-
-            # ADAPTER
-            output, *_ = self.decoder_adapter_layers[i](output_att, residual_input=output_att)
 
             # FFN
             output = self.transformer_ffn_layers[i](
