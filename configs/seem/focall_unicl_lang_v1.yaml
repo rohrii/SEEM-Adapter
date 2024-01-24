@@ -228,8 +228,8 @@ ATTENTION_ARCH:
   QUERY_NUMBER: 3
 
 DATASETS:
-  TRAIN: ["dolphin-train"] # IMPORTANT
-  TEST: ["dolphin-val"]  # IMPORTANT
+  TRAIN: ["xray-waste-train"] # IMPORTANT
+  TEST: ["xray-waste-val"]  # IMPORTANT
   CLASS_CONCAT: false
   SIZE_DIVISIBILITY: 32
   PROPOSAL_FILES_TRAIN: []
@@ -444,10 +444,14 @@ SOLVER:
     mask_embed: 0.1
   FIX_PARAM:
     model: True
+  # ONLY DECODER
   # IGNORE_FIX: ['predictor']
+  # ONLY EMBEDDING
   # IGNORE_FIX: ['class_embed', 'mask_embed']
-  IGNORE_FIX: ['class_embed', 'mask_embed', 'pixel_decoder_self_attention_adapter', 'decoder_self_attention_adapter', 'decoder_cross_attention_adapter']
-  # IGNORE_FIX: ['pixel_decoder_self_attention_adapter', 'decoder_self_attention_adapter', 'decoder_cross_attention_adapter']
+  # ADAPTERS
+  # IGNORE_FIX: ['class_embed', 'mask_embed', 'pixel_decoder_self_attention_adapter', 'decoder_self_attention_adapter', 'decoder_cross_attention_adapter']
+  # FULL HEAD
+  IGNORE_FIX: ['sem_seg_head']
   WEIGHT_DECAY_NORM: 0.0
   WEIGHT_DECAY_EMBED: 0.0
   CLIP_GRADIENTS:

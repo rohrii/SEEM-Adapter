@@ -5,8 +5,6 @@ CUDA_LAUNCH_BLOCKING=1 CUDA_VISIBLE_DEVICES=1 mpirun --cpu-set 0-4 --bind-to cor
     MODEL.ENCODER.CONVS_DIM 512 \
     MODEL.ENCODER.MASK_DIM 512 \
     MODEL.ENCODER.NUM_CLASSES 12 \
-    DATASETS.TRAIN '["xray-waste-train"]' \
-    DATASETS.TEST '["xray-waste-val"]' \
     TEST.BATCH_SIZE_TOTAL 4 \
     TRAIN.BATCH_SIZE_TOTAL 4 \
     TRAIN.BATCH_SIZE_PER_GPU 4 \
@@ -15,6 +13,4 @@ CUDA_LAUNCH_BLOCKING=1 CUDA_VISIBLE_DEVICES=1 mpirun --cpu-set 0-4 --bind-to cor
     WEIGHT True \
     RESUME_FROM seem_focall_v1.pt \
     WANDB True \
-    SOLVER.IGNORE_FIX '["class_embed", "mask_embed", "pixel_decoder_self_attention_adapter", "decoder_self_attention_adapter", "decoder_cross_attention_adapter"]' \
-    USE_ADAPTERS True \
-    ADAPTER_NUM 2 
+    USE_ADAPTERS False
