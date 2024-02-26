@@ -1,5 +1,28 @@
-# 👀*SEEM:* Segment Everything Everywhere All at Once
+# 👀*SEEM:* Segment Everything Everywhere All at Once Adapter
 
+This is the repository to fine-tune SEEM using bottleneck adapter modules.
+
+### Installation
+- Install the deps from requirements.txt as usual
+- Complete the installation with the original SEEM instruction
+- Download the datasets (NDD-20, ZeroWaste-f, WIXray) and configure their file paths in their corresponding dataset registration files of this repo.
+
+
+### Fine-tuning
+- Configure your fine-tuning settings within the provided training shell script example by filling out the \<<FIELDS\>>
+- Within the YAML config file you are using, adopt the following fields to fit to your training run:
+  - DATASETS:
+    - TRAIN: ['YOUR_DATASET_NAME FOR TRAINING']
+    - TEST: ['YOUR DATASET NAME FOR VALIDATION']
+  - INPUT:
+    - PIXEL_MEAN: [xx.xx, xx.xx, xx.xx]
+    - PIXEL_STD: [xx.xx, xx.xx, xx.xx]
+  - SOLVER:
+    - IGNORE_FIX: ["trainable", "module", "names"]
+- Set up the wandb environment variables of .env.example by copying the file to `.env` and filling out your credentials for weights an biases and the experiment name
+- Start the training with `source train.sh`
+
+# Original Readme:
 :grapes: \[[Read our arXiv Paper](https://arxiv.org/pdf/2304.06718.pdf)\] &nbsp; :apple: \[[Try our Demo](http://semantic-sam.xyzou.net:6090/)\] 
 
 We introduce **SEEM** that can **S**egment **E**verything **E**verywhere with **M**ulti-modal prompts all at once. SEEM allows users to easily segment an image using prompts of different types including visual prompts (points, marks, boxes, scribbles and image segments) and language prompts (text and audio), etc. It can also work with any combination of prompts or generalize to custom prompts!
