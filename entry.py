@@ -10,13 +10,16 @@ import sys
 import torch
 import logging
 import wandb
+import dotenv
 
 from utils.arguments import load_opt_command
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def init_wandb(args, job_dir, entity='xueyanz', project='xdecoder', job_name='tmp'):
+dotenv.load_dotenv(".env")
+
+def init_wandb(args, job_dir, project, job_name='tmp'):
     wandb_dir = os.path.join(job_dir, 'wandb')
     os.makedirs(wandb_dir, exist_ok=True)
     runid = None
@@ -26,7 +29,7 @@ def init_wandb(args, job_dir, entity='xueyanz', project='xdecoder', job_name='tm
     wandb.init(project=project,
             name=job_name,
             dir=wandb_dir,
-            entity=entity,
+            entity=os.environ['WANDB_ENTITY'],
             resume="allow",
             id=runid,
             config={"hierarchical": True},)
@@ -64,7 +67,12 @@ def main(args=None):
     if command == "train":
         if opt['rank'] == 0 and opt['WANDB']:
             wandb.login(key=os.environ['WANDB_KEY'])
-            init_wandb(opt, trainer.save_folder, job_name=trainer.save_folder)
+            init_wandb(
+                args=opt,
+                job_dir=trainer.save_folder,
+                job_name=f"{os.environ['EXP_NAME']}__{trainer.save_folder.split('/')[-1]}",
+                project=os.environ['WANDB_PROJECT']
+            )
         trainer.train()
     elif command == "evaluate":
         trainer.eval()

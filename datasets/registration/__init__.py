@@ -15,4 +15,7 @@ from . import (
     register_scannet_panoptic,
     register_bdd100k_panoseg,
     register_pascalvoc_eval,
+    register_dolphin_instance,
+    register_zerowaste_instance,
+    register_xray_waste_instance,
 )

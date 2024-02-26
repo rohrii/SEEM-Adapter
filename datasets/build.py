@@ -41,7 +41,6 @@ from .evaluation import (InstanceSegEvaluator,
                          ClassificationEvaluator, 
                          SemSegEvaluator, 
                          RetrievalEvaluator, 
-                         CaptioningEvaluator, 
                          COCOPanopticEvaluator,
                          GroundingEvaluator,
                          InteractiveEvaluator,
@@ -391,6 +390,15 @@ def get_config_from_name(cfg, dataset_name):
     elif 'sam' in dataset_name:
         cfg.update(cfg['SAM'])
         return cfg
+    elif 'dolphin' in dataset_name:
+        cfg.update(cfg["DOLPHIN"])
+        return cfg
+    elif 'zerowaste' in dataset_name:
+        cfg.update(cfg["ZEROWASTE"])
+        return cfg
+    elif 'xray-waste' in dataset_name:
+        cfg.update(cfg["XRAY_WASTE"])
+        return cfg
     else:
         assert False, "dataset not support."
 
@@ -416,6 +424,12 @@ def build_eval_dataloader(cfg, ):
             mapper = SunRGBDSegDatasetMapper(cfg, False)
         elif 'refcoco' in dataset_name:
             mapper = RefCOCODatasetMapper(cfg, False)
+        elif 'dolphin' in dataset_name:
+            mapper = DolphinDatasetMapper(cfg, False)
+        elif 'zerowaste' in dataset_name:
+            mapper = ZerowasteDatasetMapper(cfg, False)
+        elif 'xray-waste' in dataset_name:
+            mapper = XrayWasteDatasetMapper(cfg, False)
         else:
             mapper = None
         dataloaders += [build_detection_test_loader(cfg, dataset_name, mapper=mapper)]
@@ -458,6 +472,15 @@ def build_train_dataloader(cfg, ):
         elif mapper_name == "coco_interactive":
             mapper = COCOPanopticInteractiveDatasetMapper(cfg, True)
             loaders['coco'] = build_detection_train_loader(cfg, dataset_name=dataset_name, mapper=mapper)
+        elif mapper_name == "dolphin":
+            mapper = DolphinDatasetMapper(cfg, True)
+            loaders['coco'] = build_detection_train_loader(cfg, dataset_name=dataset_name, mapper=mapper)
+        elif mapper_name == "zerowaste":
+            mapper = ZerowasteDatasetMapper(cfg, True)
+            loaders['coco'] = build_detection_train_loader(cfg, dataset_name=dataset_name, mapper=mapper)
+        elif mapper_name == "xray-waste":
+            mapper = XrayWasteDatasetMapper(cfg, True)
+            loaders['coco'] = build_detection_train_loader(cfg, dataset_name=dataset_name, mapper=mapper)
         else:
             mapper = None
             loaders[dataset_name] = build_detection_train_loader(cfg, dataset_name=dataset_name, mapper=mapper)
@@ -490,6 +513,7 @@ def build_evaluator(cfg, dataset_name, output_folder=None):
                 output_dir=output_folder,
             )
         )
+
     # instance segmentation
     if evaluator_type == "coco":
         evaluator_list.append(COCOEvaluator(dataset_name, output_dir=output_folder))
@@ -512,7 +536,7 @@ def build_evaluator(cfg, dataset_name, output_folder=None):
     if (evaluator_type == "coco_panoptic_seg" and cfg_model_decoder_test["SEMANTIC_ON"]) or evaluator_type == "coco_sem_seg":
         evaluator_list.append(SemSegEvaluator(dataset_name, distributed=True, output_dir=output_folder))
     # Mapillary Vistas
-    if evaluator_type == "mapillary_vistas_panoptic_seg" and cfg_model_decoder_test["INSTANCE_ON"]:
+    if evaluator_type == "coco_instance" and cfg_model_decoder_test["INSTANCE_ON"]:
         evaluator_list.append(InstanceSegEvaluator(dataset_name, output_dir=output_folder))
     if evaluator_type == "mapillary_vistas_panoptic_seg" and cfg_model_decoder_test["SEMANTIC_ON"]:
         evaluator_list.append(SemSegEvaluator(dataset_name, distributed=True, output_dir=output_folder))
@@ -553,8 +577,6 @@ def build_evaluator(cfg, dataset_name, output_folder=None):
     # Retrieval
     if evaluator_type in ["retrieval"]:
         evaluator_list.append(RetrievalEvaluator(dataset_name, output_folder, cfg['MODEL']['DECODER']['RETRIEVAL']['ENSEMBLE']))
-    if evaluator_type == "captioning":
-        evaluator_list.append(CaptioningEvaluator(dataset_name, output_folder, MetadataCatalog.get(dataset_name).gt_json))
     if evaluator_type in ["grounding_refcoco", "grounding_phrasecut", "grounding_spatial", "grounding_entity"]:
         evaluator_list.append(GroundingEvaluator(dataset_name))
     # Interactive

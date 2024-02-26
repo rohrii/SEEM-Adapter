@@ -85,6 +85,7 @@ target/
 lib/pycocotools/_mask.c
 lib/nms/cpu_nms.c
 
+output/*
 OUTPUT
 OUTPUT/*
 models/*
@@ -111,3 +112,5 @@ Config/*
 ./demo_code/*.pth
 *.pt
 *.pth
+
+.env

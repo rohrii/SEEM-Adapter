@@ -14,6 +14,10 @@ from typing import List, Optional
 import torch
 import torch.nn.functional as F
 from torch import Tensor, nn
+from transformers.adapters import AdapterConfig
+from transformers.adapters.modeling import Adapter
+
+from modeling.modules.seem_adapter import SeemAdapter
 
 
 class Transformer(nn.Module):
@@ -160,9 +164,17 @@ class TransformerEncoderLayer(nn.Module):
         dropout=0.1,
         activation="relu",
         normalize_before=False,
+        use_adapter=False,
+        adapter_downscale=4,
+        adapter_num=1,
     ):
         super().__init__()
+        self.use_adapter = use_adapter
         self.self_attn = nn.MultiheadAttention(d_model, nhead, dropout=dropout)
+
+        if use_adapter:
+            self.pixel_decoder_self_attention_adapter = SeemAdapter(d_model=d_model, reduction=adapter_downscale, num_adapters=adapter_num)
+
         # Implementation of Feedforward model
         self.linear1 = nn.Linear(d_model, dim_feedforward)
         self.dropout = nn.Dropout(dropout)
@@ -191,7 +203,15 @@ class TransformerEncoderLayer(nn.Module):
         src2 = self.self_attn(
             q, k, value=src, attn_mask=src_mask, key_padding_mask=src_key_padding_mask
         )[0]
-        src = src + self.dropout1(src2)
+
+        src2 = self.dropout1(src2)
+
+        # FPN ENCODER ADAPTER
+        if self.use_adapter:
+            res_input = src + src2
+            src2 = self.pixel_decoder_self_attention_adapter(src2, residual_input=res_input)
+
+        src = src + src2
         src = self.norm1(src)
         src2 = self.linear2(self.dropout(self.activation(self.linear1(src))))
         src = src + self.dropout2(src2)

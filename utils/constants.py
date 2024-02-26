@@ -113,3 +113,10 @@ PASCAL_CLASSES = [
     "chair", "cow", "diningtable", "dog", "horse", "motorbike", "person",
     "pottedplant", "sheep", "sofa", "train", "tvmonitor"
 ]
+
+
+DOLPHIN_CLASSES = ["dolphin"]
+
+ZEROWASTE_CLASSES = ["cardboard", "metal", "rigid_plastic", "soft_plastic"]
+
+XRAY_WASTE_CLASSES = ["Recyclabel_PlasticBottle", "ResidualWaste_MealBox", "Recyclabel_Can", "Recyclabel_Carton", "Recyclabel_Glassbottle", "Recyclabel_Stick", "FoodWaste", "Recyclabel_Tableware", "ResidualWaste_HeatingPad", "ResidualWaste_Desiccant", "HazardousWaste_Battery", "HazardousWaste_Bulb"]

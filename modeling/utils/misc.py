@@ -207,6 +207,12 @@ def get_class_names(name):
         return BDD_PANO + ["background"]
     elif 'vlp' in name:
         return ["background"]
+    elif 'dolphin' in name:
+        return DOLPHIN_CLASSES + ["background"]
+    elif 'zerowaste' in name:
+        return ZEROWASTE_CLASSES + ["background"]
+    elif 'xray-waste' in name:
+        return XRAY_WASTE_CLASSES + ["background"]
     else:
         assert False, "text dataset name {} is not defined".format(name)
 

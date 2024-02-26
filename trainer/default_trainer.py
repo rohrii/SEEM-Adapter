@@ -287,13 +287,19 @@ class DefaultTrainer(UtilsTrainer, DistributedTrainer):
                                         f"mini batches[{self.train_params['num_updates']:6}] "
                                         f"memory[{memory:.0f}] "
                                         f"epoch remaining[{str((datetime.now() - epoch_start_time) / (batch_idx + 1) * (self.train_params['updates_per_epoch'] - batch_idx - 1)).split('.')[0]}]")
+                            
+                        
 
-                # evaluate and save ckpt every epoch
+                # evaluate and save ckpt every x epoch
                 if batch_idx + 1 == self.train_params['updates_per_epoch']:
-                    self.save_checkpoint(self.train_params['num_updates'])
+                    if (epoch + 1) % self.opt['CHECKPOINT_EVERY_EPOCH'] == 0:
+                        self.save_checkpoint(self.train_params['num_updates'])
+                    
                     results = self._eval_on_set(self.save_folder)
                     if self.opt['rank'] == 0 and self.opt['WANDB']:
                         wandb.log(results)
+                    
+                    torch.cuda.reset_peak_memory_stats()
                     break
 
             logger.info(f"This epoch takes {datetime.now() - epoch_start_time}")

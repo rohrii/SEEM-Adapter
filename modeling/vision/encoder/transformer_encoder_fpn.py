@@ -158,11 +158,15 @@ class TransformerEncoderOnly(nn.Module):
         dropout=0.1,
         activation="relu",
         normalize_before=False,
+        use_adapters=False,
+        adapter_downscale=4,
+        adapter_num=1,
     ):
         super().__init__()
 
         encoder_layer = TransformerEncoderLayer(
-            d_model, nhead, dim_feedforward, dropout, activation, normalize_before
+            d_model, nhead, dim_feedforward, dropout, activation, normalize_before,
+            use_adapters, adapter_downscale, adapter_num
         )
         encoder_norm = nn.LayerNorm(d_model) if normalize_before else None
         self.encoder = TransformerEncoder(encoder_layer, num_encoder_layers, encoder_norm)
@@ -204,6 +208,9 @@ class TransformerEncoderPixelDecoder(BasePixelDecoder):
         conv_dim: int,
         mask_dim: int,
         mask_on: int,
+        use_adapters: bool,
+        adapter_downscale: int,
+        adapter_num: int,
         norm: Optional[Union[str, Callable]] = None,
     ):
         """
@@ -236,6 +243,9 @@ class TransformerEncoderPixelDecoder(BasePixelDecoder):
             dim_feedforward=transformer_dim_feedforward,
             num_encoder_layers=transformer_enc_layers,
             normalize_before=transformer_pre_norm,
+            use_adapters=use_adapters,
+            adapter_downscale=adapter_downscale,
+            adapter_num=adapter_num,
         )
         N_steps = conv_dim // 2
         self.pe_layer = PositionEmbeddingSine(N_steps, normalize=True)
@@ -271,6 +281,9 @@ class TransformerEncoderPixelDecoder(BasePixelDecoder):
         ret["transformer_pre_norm"] = dec_cfg['PRE_NORM']
 
         ret['mask_on'] = cfg['MODEL']['DECODER']['MASK']
+        ret["use_adapters"] = cfg["USE_ADAPTERS"]
+        ret["adapter_downscale"] = cfg["ADAPTER_DOWNSCALE_FACTOR"]
+        ret["adapter_num"] = cfg["ADAPTER_NUM"]
         return ret
 
     def forward_features(self, features):

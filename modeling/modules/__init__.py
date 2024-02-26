@@ -4,3 +4,4 @@ from .postprocessing import *
 from .attention import *
 from .criterion import *
 from .matcher import *
+from .seem_adapter import *

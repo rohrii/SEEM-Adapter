@@ -125,7 +125,7 @@ class HungarianMatcher(nn.Module):
             out_mask = outputs["pred_masks"][b]  # [num_queries, H_pred, W_pred]
             # gt masks are already padded when preparing target
             tgt_mask = targets[b]["masks"].to(out_mask)
-            
+
             out_mask = out_mask[:, None]
             tgt_mask = tgt_mask[:, None]
             # all masks share the same set of points for efficient matching!
@@ -142,6 +142,7 @@ class HungarianMatcher(nn.Module):
                 point_coords.repeat(out_mask.shape[0], 1, 1),
                 align_corners=False,
             ).squeeze(1)
+
 
             with autocast(enabled=False):
                 out_mask = out_mask.float()

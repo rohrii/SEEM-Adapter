@@ -10,6 +10,8 @@ from typing import Optional
 import torch
 from torch import nn, Tensor
 from torch.nn import functional as F
+from transformers.adapters import AdapterConfig
+from transformers.adapters.modeling import Adapter
 
 from timm.models.layers import trunc_normal_
 from detectron2.layers import Conv2d
@@ -45,6 +47,9 @@ class SEEMDecoder(nn.Module):
         enforce_input_project: bool,
         max_spatial_len: int,
         attn_arch: dict,
+        use_adapters: bool,
+        adapter_downscale: int,
+        adapter_num: int,
     ):
         """
         NOTE: this interface is experimental.
@@ -86,6 +91,9 @@ class SEEMDecoder(nn.Module):
                     nhead=nheads,
                     dropout=0.0,
                     normalize_before=pre_norm,
+                    use_adapter=use_adapters,
+                    adapter_downscale=adapter_downscale,
+                    adapter_num=adapter_num
                 )
             )
 
@@ -95,6 +103,9 @@ class SEEMDecoder(nn.Module):
                     nhead=nheads,
                     dropout=0.0,
                     normalize_before=pre_norm,
+                    use_adapter=use_adapters,
+                    adapter_downscale=adapter_downscale,
+                    adapter_num=adapter_num
                 )
             )
 
@@ -195,6 +206,11 @@ class SEEMDecoder(nn.Module):
 
         # attn data struct
         ret["attn_arch"] = cfg['ATTENTION_ARCH']
+
+        # use adapters
+        ret["use_adapters"] = cfg['USE_ADAPTERS']
+        ret["adapter_downscale"] = cfg["ADAPTER_DOWNSCALE_FACTOR"]
+        ret["adapter_num"] = cfg["ADAPTER_NUM"]
 
         return ret
 
@@ -317,6 +333,7 @@ class SEEMDecoder(nn.Module):
                 memory_key_padding_mask=None,  # here we do not apply masking on padded region
                 pos=pos[level_index], query_pos=query_embed
             )
+
             self.attention_data.update_variables(output, 'cross_attn')
 
             # SELF ATTENTION

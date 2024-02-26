@@ -8,18 +8,29 @@ from timm.models.layers import trunc_normal_
 from detectron2.layers import Conv2d
 import fvcore.nn.weight_init as weight_init
 
+from transformers.adapters import AdapterConfig
+from transformers.adapters.modeling import Adapter
+
+from modeling.modules.seem_adapter import SeemAdapter
+
 from ..utils import MultiheadAttention
 
 
 class SelfAttentionLayer(nn.Module):
 
     def __init__(self, d_model, nhead, dropout=0.0,
-                 activation="relu", normalize_before=False):
+                 activation="relu", normalize_before=False,
+                 use_adapter=False, adapter_downscale=4, adapter_num=1):
         super().__init__()
         self.self_attn = MultiheadAttention(d_model, nhead, dropout=dropout)
 
         self.norm = nn.LayerNorm(d_model)
         self.dropout = nn.Dropout(dropout)
+
+        self.use_adapter = use_adapter
+
+        if use_adapter:
+            self.decoder_self_attention_adapter = SeemAdapter(d_model=d_model, reduction=adapter_downscale, num_adapters=adapter_num)
 
         self.activation = _get_activation_fn(activation)
         self.normalize_before = normalize_before
@@ -42,7 +53,15 @@ class SelfAttentionLayer(nn.Module):
         q = k = self.with_pos_embed(tgt, query_pos)
         tgt2 = self.self_attn(q, k, value=tgt, attn_mask=tgt_mask,
                               key_padding_mask=tgt_key_padding_mask)[0]
-        tgt = tgt + self.dropout(tgt2)
+        
+        tgt2 = self.dropout(tgt2)
+
+        # SELF ATTENTION ADAPTER
+        if self.use_adapter:
+            res_input = tgt + tgt2
+            tgt2 = self.decoder_self_attention_adapter(tgt2, residual_input=res_input)
+
+        tgt = tgt + tgt2
         tgt = self.norm(tgt)
         return tgt
 
@@ -72,12 +91,18 @@ class SelfAttentionLayer(nn.Module):
 class CrossAttentionLayer(nn.Module):
 
     def __init__(self, d_model, nhead, dropout=0.0,
-                 activation="relu", normalize_before=False):
+                 activation="relu", normalize_before=False,
+                 use_adapter=False, adapter_downscale=4, adapter_num=1):
         super().__init__()
         self.multihead_attn = nn.MultiheadAttention(d_model, nhead, dropout=dropout)
 
         self.norm = nn.LayerNorm(d_model)
         self.dropout = nn.Dropout(dropout)
+
+        self.use_adapter = use_adapter
+
+        if use_adapter:
+            self.decoder_cross_attention_adapter = SeemAdapter(d_model=d_model, reduction=adapter_downscale, num_adapters=adapter_num)
 
         self.activation = _get_activation_fn(activation)
         self.normalize_before = normalize_before
@@ -101,7 +126,14 @@ class CrossAttentionLayer(nn.Module):
                                    key=self.with_pos_embed(memory, pos),
                                    value=memory, attn_mask=memory_mask,
                                    key_padding_mask=memory_key_padding_mask)
-        tgt = tgt + self.dropout(tgt2)
+        tgt2 = self.dropout(tgt2)
+
+        # CROSS ATTENTION ADAPTER
+        if self.use_adapter:
+            res_input = tgt + tgt2
+            tgt2 = self.decoder_cross_attention_adapter(tgt2, residual_input=res_input)
+
+        tgt = tgt + tgt2
         tgt = self.norm(tgt)
         return tgt, avg_attn
 
