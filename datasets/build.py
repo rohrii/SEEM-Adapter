@@ -37,7 +37,6 @@ from detectron2.evaluation import (
 from fvcore.common.config import CfgNode
 
 from .dataset_mappers import *
-from .dataset_mappers.table_tennis_dataset_mapper import TableTennisDatasetMapper
 from .evaluation import (InstanceSegEvaluator, 
                          ClassificationEvaluator, 
                          SemSegEvaluator, 
@@ -391,18 +390,6 @@ def get_config_from_name(cfg, dataset_name):
     elif 'sam' in dataset_name:
         cfg.update(cfg['SAM'])
         return cfg
-    elif 'table_tennis' in dataset_name:
-        cfg.update(cfg['TABLETENNIS'])
-        return cfg
-    elif 'chestx' in dataset_name:
-        cfg.update(cfg['CHESTX'])
-        return cfg
-    elif 'pan_nuke' in dataset_name:
-        cfg.update(cfg["PAN_NUKE"])
-        return cfg
-    elif 'trashcan' in dataset_name:
-        cfg.update(cfg["TRASHCAN"])
-        return cfg
     elif 'dolphin' in dataset_name:
         cfg.update(cfg["DOLPHIN"])
         return cfg
@@ -437,14 +424,6 @@ def build_eval_dataloader(cfg, ):
             mapper = SunRGBDSegDatasetMapper(cfg, False)
         elif 'refcoco' in dataset_name:
             mapper = RefCOCODatasetMapper(cfg, False)
-        elif 'table_tennis' in dataset_name:
-            mapper = TableTennisDatasetMapper(cfg, False)
-        elif 'chestx' in dataset_name:
-            mapper = ChestXDatasetMapper(cfg, False)
-        elif 'pan_nuke' in dataset_name:
-            mapper = PanNukeDatasetMapper(cfg, False)
-        elif 'trashcan' in dataset_name:
-            mapper = TrashcanDatasetMapper(cfg, False)
         elif 'dolphin' in dataset_name:
             mapper = DolphinDatasetMapper(cfg, False)
         elif 'zerowaste' in dataset_name:
@@ -492,18 +471,6 @@ def build_train_dataloader(cfg, ):
             loaders['ref'] = build_detection_train_loader(cfg, dataset_name=dataset_name, mapper=mapper)
         elif mapper_name == "coco_interactive":
             mapper = COCOPanopticInteractiveDatasetMapper(cfg, True)
-            loaders['coco'] = build_detection_train_loader(cfg, dataset_name=dataset_name, mapper=mapper)
-        elif mapper_name == "table_tennis":
-            mapper = TableTennisDatasetMapper(cfg, True)
-            loaders['coco'] = build_detection_train_loader(cfg, dataset_name=dataset_name, mapper=mapper)
-        elif mapper_name == "chestx":
-            mapper = ChestXDatasetMapper(cfg, True)
-            loaders['coco'] = build_detection_train_loader(cfg, dataset_name=dataset_name, mapper=mapper)
-        elif mapper_name == "pan_nuke":
-            mapper = PanNukeDatasetMapper(cfg, True)
-            loaders['coco'] = build_detection_train_loader(cfg, dataset_name=dataset_name, mapper=mapper)
-        elif mapper_name == "trashcan":
-            mapper = TrashcanDatasetMapper(cfg, True)
             loaders['coco'] = build_detection_train_loader(cfg, dataset_name=dataset_name, mapper=mapper)
         elif mapper_name == "dolphin":
             mapper = DolphinDatasetMapper(cfg, True)

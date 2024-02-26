@@ -114,14 +114,6 @@ PASCAL_CLASSES = [
     "pottedplant", "sheep", "sofa", "train", "tvmonitor"
 ]
 
-TABLE_TENNIS_CLASSES = ["ball", "left", "right", "paddle", "player", "referee"]
-
-CHEST_X_CLASSES = ["Atelectasis", "Calcification", "Cardiomegaly", "Consolidation", "Diffuse Nodule", "Effusion",
-                   "Emphysema", "Fibrosis", "Fracture", "Mass", "Nodule", "Pleural Thickening", "Pneumothorax"]
-
-PAN_NUKE_CLASSES = ["neoplastic","inflammatory","softtissue","dead","epithelial"]
-
-TRASHCAN_CLASSES = ["rov", "plant", "animal_fish", "animal_starfish", "animal_shells", "animal_crab", "animal_eel", "animal_etc", "trash_clothing", "trash_pipe", "trash_bottle", "trash_bag", "trash_snack_wrapper", "trash_can", "trash_cup", "trash_container", "trash_unknown_instance", "trash_branch", "trash_wreckage", "trash_tarp", "trash_rope", "trash_net"]
 
 DOLPHIN_CLASSES = ["dolphin"]
 

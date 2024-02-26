@@ -207,14 +207,6 @@ def get_class_names(name):
         return BDD_PANO + ["background"]
     elif 'vlp' in name:
         return ["background"]
-    elif 'table_tennis' in name:
-        return TABLE_TENNIS_CLASSES + ["background"]
-    elif 'chestx' in name:
-        return CHEST_X_CLASSES + ["background"]
-    elif 'pan_nuke' in name:
-        return PAN_NUKE_CLASSES + ["background"]
-    elif 'trashcan' in name:
-        return TRASHCAN_CLASSES + ["background"]
     elif 'dolphin' in name:
         return DOLPHIN_CLASSES + ["background"]
     elif 'zerowaste' in name:

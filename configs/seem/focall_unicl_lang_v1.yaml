@@ -83,7 +83,7 @@ MODEL:
   ENCODER:
     NAME: transformer_encoder_fpn
     IGNORE_VALUE: 255
-    NUM_CLASSES: 1 # IMPORTANT
+    NUM_CLASSES: 4 # IMPORTANT
     LOSS_WEIGHT: 1.0
     CONVS_DIM: 512
     MASK_DIM: 512
@@ -228,15 +228,15 @@ ATTENTION_ARCH:
   QUERY_NUMBER: 3
 
 DATASETS:
-  TRAIN: ["xray-waste-train"] # IMPORTANT
-  TEST: ["xray-waste-val"]  # IMPORTANT
+  TRAIN: ["dolphin-train"] # IMPORTANT
+  TEST: ["dolphin-val"]  # IMPORTANT
   CLASS_CONCAT: false
   SIZE_DIVISIBILITY: 32
   PROPOSAL_FILES_TRAIN: []
 
 INPUT:
-  PIXEL_MEAN: [249.4894, 248.8183, 246.3549] # IMPORTANT
-  PIXEL_STD: [18.6302, 20.3218, 28.5849] # IMPORTANT
+  PIXEL_MEAN: [92.2797, 154.551, 153.192] # IMPORTANT
+  PIXEL_STD: [67.1433, 39.6286, 41.3266] # IMPORTANT
 
 TRAIN:
   ASPECT_RATIO_GROUPING: true
@@ -427,7 +427,7 @@ REF:
 
 # Detectron2 training config for optimizer and lr scheduler
 SOLVER:
-  BASE_LR: 0.0001
+  BASE_LR: 0.001
   STEPS: [0.88889, 0.96296]
   MAX_ITER: 1
   GAMMA: 0.1
@@ -449,9 +449,9 @@ SOLVER:
   # ONLY EMBEDDING
   # IGNORE_FIX: ['class_embed', 'mask_embed']
   # ADAPTERS
-  # IGNORE_FIX: ['class_embed', 'mask_embed', 'pixel_decoder_self_attention_adapter', 'decoder_self_attention_adapter', 'decoder_cross_attention_adapter']
+  IGNORE_FIX: ['class_embed', 'mask_embed', 'pixel_decoder_self_attention_adapter', 'decoder_self_attention_adapter', 'decoder_cross_attention_adapter']
   # FULL HEAD
-  IGNORE_FIX: ['sem_seg_head']
+  # IGNORE_FIX: ['sem_seg_head']
   WEIGHT_DECAY_NORM: 0.0
   WEIGHT_DECAY_EMBED: 0.0
   CLIP_GRADIENTS:

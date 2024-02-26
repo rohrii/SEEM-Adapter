@@ -98,6 +98,8 @@ class XDecoder_Trainer(DefaultTrainer):
         table = PrettyTable(["Model name", "Module name","Param Name", "# Parameters"])
         num_trained_params = 0
         num_frozen_params = 0
+        param_size = 0
+        buffer_size = 0
 
         for _module_name in self.model_names:
             # parameters = self.raw_models[module_name].get_training_parameters()
@@ -107,7 +109,12 @@ class XDecoder_Trainer(DefaultTrainer):
             params: List[Dict[str, Any]] = []
             memo: Set[torch.nn.parameter.Parameter] = set()
             for module_name, module in self.raw_models[_module_name].named_modules():
+                for buffer in module.buffers():
+                    buffer_size += buffer.nelement() * buffer.element_size()
+                
                 for module_param_name, value in module.named_parameters(recurse=False):
+                    param_size += value.nelement() * value.element_size()
+
                     if not value.requires_grad:
                         num_frozen_params += value.numel()
                         continue
@@ -179,6 +186,9 @@ class XDecoder_Trainer(DefaultTrainer):
                     f"Sum of trained parameters: {num_trained_params} ({round((num_trained_params / num_total_params) * 100, 2)}%)\n"
                     f"Sum of frozen parameters: {num_frozen_params} ({round((num_frozen_params / num_total_params) * 100, 2)}%)\n"
                     f"{table}")
+        
+        size_all_mb = (param_size + buffer_size) / 1024**2
+        logger.info(f"TOTAL MODEL SIZE (MB): {size_all_mb:.3f} MB")
 
         num_epoch = self.opt['SOLVER']['MAX_NUM_EPOCHS']
         cfg_solver['MAX_ITER'] = num_epoch * self.train_params['updates_per_epoch']
