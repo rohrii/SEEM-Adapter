@@ -24,7 +24,7 @@ from detectron2.projects.deeplab import build_lr_scheduler
 from fvcore.common.config import CfgNode
 from infinibatch import iterators
 
-from utils.distributed import is_main_process, get_world_size
+from utils.distributed import get_rank, is_main_process, get_world_size
 from .default_trainer import DefaultTrainer
 from .utils.serialization import JSONEncoder, filter_jsonable
 
@@ -181,30 +181,23 @@ class XDecoder_Trainer(DefaultTrainer):
             self.optimizers[_module_name].zero_grad()
 
         num_total_params = num_trained_params + num_frozen_params
-        logger.info(f"TRAINABLE PARAMS SUMMARY:\n"
-                    f"Total parameters: {num_total_params}\n"
-                    f"Sum of trained parameters: {num_trained_params} ({round((num_trained_params / num_total_params) * 100, 2)}%)\n"
-                    f"Sum of frozen parameters: {num_frozen_params} ({round((num_frozen_params / num_total_params) * 100, 2)}%)\n"
-                    f"{table}")
-        
         size_all_mb = (param_size + buffer_size) / 1024**2
-        logger.info(f"TOTAL MODEL SIZE (MB): {size_all_mb:.3f} MB")
+        if get_rank() == 0:
+            logger.info(f"TRAINABLE PARAMS SUMMARY:\n"
+                        f"Total parameters: {num_total_params}\n"
+                        f"Sum of trained parameters: {num_trained_params} ({round((num_trained_params / num_total_params) * 100, 2)}%)\n"
+                        f"Sum of frozen parameters: {num_frozen_params} ({round((num_frozen_params / num_total_params) * 100, 2)}%)\n"
+                        f"{table}")
+        
+            logger.info(f"TOTAL MODEL SIZE (MB): {size_all_mb:.3f} MB")
 
         num_epoch = self.opt['SOLVER']['MAX_NUM_EPOCHS']
         cfg_solver['MAX_ITER'] = num_epoch * self.train_params['updates_per_epoch']
         cfg_solver['STEPS'] = [int(x*cfg_solver['MAX_ITER']) for x in cfg_solver['STEPS']]
-        logger.info(f"Calculate MAX_ITER @ {cfg_solver['MAX_ITER']} and STEPS @ {cfg_solver['STEPS']}")
+
+        if get_rank() == 0:
+            logger.info(f"Calculate MAX_ITER @ {cfg_solver['MAX_ITER']} and STEPS @ {cfg_solver['STEPS']}")
 
         for module_name in self.model_names:
             scheduler_cfg = CfgNode({'SOLVER': cfg_solver})
             self.lr_schedulers[module_name] = build_lr_scheduler(scheduler_cfg, self.optimizers[module_name])
-
-        for module_name in self.model_names:
-            num_params = 0
-            num_trainable_params = 0
-            for name, param in self.raw_models[module_name].named_parameters():
-                num_params += param.numel()
-                if param.requires_grad:
-                    num_trainable_params += param.numel()
-            logger.info(f"Total number of parameters in {module_name} module (on each GPU): {num_params}")
-            logger.info(f"Number of trainable parameters in {module_name} module (on each GPU): {num_trainable_params}")

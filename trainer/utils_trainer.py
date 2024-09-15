@@ -17,7 +17,7 @@ import numpy as np
 import copy
 import contextlib
 import shutil
-from typing import Any, Callable, Union
+from typing import Any, Callable, Dict, Union
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -110,10 +110,14 @@ class UtilsTrainer(DistributedTrainer):
                 module_save_dir = os.path.join(save_dir, module_name)
                 os.makedirs(module_save_dir, exist_ok=True)
                 save_path = os.path.join(module_save_dir, 'module_training_states.pt')
-                state = {'module': self.models[module_name].state_dict(),
-                            'optimizer': self.optimizers[module_name].state_dict(),
-                            'lr_scheduler': self.lr_schedulers[module_name].state_dict(),
-                            'amp_state': amp_state,}
+                
+                state = {
+                    'module': self._get_tuned_state_dict(module_name),
+                    'optimizer': self.optimizers[module_name].state_dict(),
+                    'lr_scheduler': self.lr_schedulers[module_name].state_dict(),
+                    'amp_state': amp_state
+                }
+                
                 torch.save(state, save_path)
 
         if self.opt['rank'] == 0:
@@ -153,6 +157,24 @@ class UtilsTrainer(DistributedTrainer):
 
         logger.warning(f'Finished saving checkpoint and model to {save_dir}.')
 
+    def _get_tuned_state_dict(self, module_name) -> Dict[str, Any]:
+        state = self.models[module_name].state_dict()
+
+        ignore_fix = self.opt["SOLVER"].get('IGNORE_FIX', [])
+
+        if not ignore_fix:
+            return state
+
+        ret = {}
+
+        for key, value in state.items():
+            # Add only the keys that we care about
+            for tuned_param_name in ignore_fix:
+                if tuned_param_name in key:
+                    ret[key] = value
+
+        return ret
+
     def load_weight(self, checkpoint_path=None, must_exist=False):
         self.load_model(checkpoint_path)
         logger.warning(f'Load weights from {checkpoint_path}...')
@@ -169,7 +191,7 @@ class UtilsTrainer(DistributedTrainer):
             if get_world_size() <= 1:
                 ckpt = {key.replace('module.',''):ckpt[key] for key in ckpt.keys()}
                 
-            self.models[model_name].load_state_dict(ckpt)
+            self.models[model_name].load_state_dict(ckpt, strict=False)
             self.optimizers[model_name].load_state_dict(state['optimizer'])
             self.lr_schedulers[model_name].load_state_dict(state['lr_scheduler'])
             if self.opt['FP16']:

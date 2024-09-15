@@ -3,24 +3,31 @@
 This is the repository to fine-tune SEEM using bottleneck adapter modules.
 
 ### Installation
-- Install the deps from requirements.txt as usual
-- Complete the installation with the original SEEM instruction
-- Download the datasets (NDD-20, ZeroWaste-f, WIXray) and configure their file paths in their corresponding dataset registration files of this repo.
+- Install openmpi (required for mpirun):
+  ```sh
+  sudo apt install libopenmpi-dev
+  ```
+- Install the requirements:
+  ```sh
+  pip install -r assets/requirements/requirements.txt
+  pip install -r assets/requirements/requirements_custom.txt
+  ```
+- [OPTIONAL] Build the deformable attention module:
+  ```sh
+  cd modeling/vision/encoder/ops && sh make.sh && cd ../../../../
+  ```
+- Download the datasets (NDD-20, ZeroWaste-f, WIXray, Cityscapes) and configure their file paths in their corresponding dataset registration files of this repo.
 
 
 ### Fine-tuning
+- Download the base weights:
+  ```sh
+  wget https://huggingface.co/xdecoder/SEEM/resolve/main/seem_focall_v1.pt
+  ```
 - Configure your fine-tuning settings within the provided training shell script example by filling out the \<<FIELDS\>>
-- Within the YAML config file you are using, adopt the following fields to fit to your training run:
-  - DATASETS:
-    - TRAIN: ['YOUR_DATASET_NAME FOR TRAINING']
-    - TEST: ['YOUR DATASET NAME FOR VALIDATION']
-  - INPUT:
-    - PIXEL_MEAN: [xx.xx, xx.xx, xx.xx]
-    - PIXEL_STD: [xx.xx, xx.xx, xx.xx]
-  - SOLVER:
-    - IGNORE_FIX: ["trainable", "module", "names"]
-- Set up the wandb environment variables of .env.example by copying the file to `.env` and filling out your credentials for weights an biases and the experiment name
-- Start the training with `source train.sh`
+  - SOLVER.IGNORE_FIX are the module names you want to be trainable. Adapter and LoRA weights are set trainable by default if enabled, so the don't need to be defined here.
+- Set up the wandb environment variables of .env.example by copying the file to `.env` and filling out your credentials for weights an biases
+- Start the training with `source train_adapter.sh` or `source train_lora.sh`
 
 # Original Readme:
 :grapes: \[[Read our arXiv Paper](https://arxiv.org/pdf/2304.06718.pdf)\] &nbsp; :apple: \[[Try our Demo](http://semantic-sam.xyzou.net:6090/)\] 

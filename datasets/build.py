@@ -430,6 +430,8 @@ def build_eval_dataloader(cfg, ):
             mapper = ZerowasteDatasetMapper(cfg, False)
         elif 'xray-waste' in dataset_name:
             mapper = XrayWasteDatasetMapper(cfg, False)
+        elif 'cityscapes' in dataset_name:
+            mapper = CityscapesDatasetMapper(cfg, False)
         else:
             mapper = None
         dataloaders += [build_detection_test_loader(cfg, dataset_name, mapper=mapper)]
@@ -480,6 +482,9 @@ def build_train_dataloader(cfg, ):
             loaders['coco'] = build_detection_train_loader(cfg, dataset_name=dataset_name, mapper=mapper)
         elif mapper_name == "xray-waste":
             mapper = XrayWasteDatasetMapper(cfg, True)
+            loaders['coco'] = build_detection_train_loader(cfg, dataset_name=dataset_name, mapper=mapper)
+        elif mapper_name == "cityscapes":
+            mapper = CityscapesDatasetMapper(cfg, True)
             loaders['coco'] = build_detection_train_loader(cfg, dataset_name=dataset_name, mapper=mapper)
         else:
             mapper = None

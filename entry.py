@@ -5,6 +5,8 @@
 # Modified by Xueyan Zou (xueyan@cs.wisc.edu)
 # --------------------------------------------------------
 
+import warnings
+warnings.filterwarnings(action='ignore', category=FutureWarning)
 import os
 import sys
 import torch
@@ -70,7 +72,7 @@ def main(args=None):
             init_wandb(
                 args=opt,
                 job_dir=trainer.save_folder,
-                job_name=f"{os.environ['EXP_NAME']}__{trainer.save_folder.split('/')[-1]}",
+                job_name=f"{opt['WANDB_EXP_NAME']}__{trainer.save_folder.split('/')[-1]}",
                 project=os.environ['WANDB_PROJECT']
             )
         trainer.train()

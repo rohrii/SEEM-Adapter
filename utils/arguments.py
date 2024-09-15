@@ -2,6 +2,7 @@ import yaml
 import json
 import argparse
 import logging
+import ast
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +78,13 @@ def load_opt_command(args):
             ele = opt.copy()
             while len(key) > 0:
                 ele = ele[key.pop(0)]
-            types.append(type(ele))
+
+            t = type(ele)
+
+            if t == list:
+                types.append(ast.literal_eval)
+            else:
+                types.append(t)
         
         config_dict = {x:z(y) for x,y,z in zip(keys, vals, types)}
         load_config_dict_to_opt(opt, config_dict)
@@ -86,5 +93,22 @@ def load_opt_command(args):
     for key, val in cmdline_args.__dict__.items():
         if val is not None:
             opt[key] = val
+
+    # Add the default tunable parameters depending on config (LoRA, adapters)
+    ignore_fix_defaults = []
+
+    if opt.get("USE_ADAPTERS", False):
+        adapter_layers = ['pixel_decoder_self_attention_adapter', 'decoder_cross_attention_adapter', 'decoder_self_attention_adapter']
+        ignore_fix_defaults.extend(adapter_layers)
+
+    if opt.get("USE_LORA", False):
+        ignore_fix_defaults.append('lora_')
+
+    if not opt["SOLVER"].get("IGNORE_FIX", []):
+        opt["SOLVER"]["IGNORE_FIX"] = []
+    
+    for ign_default in ignore_fix_defaults:
+        if not any(ign_default in ign for ign in opt["SOLVER"]["IGNORE_FIX"]):
+            opt["SOLVER"]["IGNORE_FIX"].append(ign_default)
 
     return opt, cmdline_args

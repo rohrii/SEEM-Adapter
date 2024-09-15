@@ -161,12 +161,17 @@ class TransformerEncoderOnly(nn.Module):
         use_adapters=False,
         adapter_downscale=4,
         adapter_num=1,
+        use_lora=False,
+        lora_targets=[],
+        lora_rank=8,
+        lora_alpha=1,
     ):
         super().__init__()
 
         encoder_layer = TransformerEncoderLayer(
             d_model, nhead, dim_feedforward, dropout, activation, normalize_before,
-            use_adapters, adapter_downscale, adapter_num
+            use_adapters, adapter_downscale, adapter_num,
+            use_lora, lora_targets, lora_rank, lora_alpha
         )
         encoder_norm = nn.LayerNorm(d_model) if normalize_before else None
         self.encoder = TransformerEncoder(encoder_layer, num_encoder_layers, encoder_norm)
@@ -177,8 +182,8 @@ class TransformerEncoderOnly(nn.Module):
         self.nhead = nhead
 
     def _reset_parameters(self):
-        for p in self.parameters():
-            if p.dim() > 1:
+        for name, p in self.named_parameters():
+            if p.dim() > 1 and 'lora_' not in name:
                 nn.init.xavier_uniform_(p)
 
     def forward(self, src, mask, pos_embed):
@@ -211,6 +216,10 @@ class TransformerEncoderPixelDecoder(BasePixelDecoder):
         use_adapters: bool,
         adapter_downscale: int,
         adapter_num: int,
+        use_lora: bool,
+        lora_targets: list[str],
+        lora_rank: int,
+        lora_alpha: int,
         norm: Optional[Union[str, Callable]] = None,
     ):
         """
@@ -246,6 +255,10 @@ class TransformerEncoderPixelDecoder(BasePixelDecoder):
             use_adapters=use_adapters,
             adapter_downscale=adapter_downscale,
             adapter_num=adapter_num,
+            use_lora=use_lora,
+            lora_targets=lora_targets,
+            lora_rank=lora_rank,
+            lora_alpha=lora_alpha,
         )
         N_steps = conv_dim // 2
         self.pe_layer = PositionEmbeddingSine(N_steps, normalize=True)
@@ -284,6 +297,12 @@ class TransformerEncoderPixelDecoder(BasePixelDecoder):
         ret["use_adapters"] = cfg["USE_ADAPTERS"]
         ret["adapter_downscale"] = cfg["ADAPTER_DOWNSCALE_FACTOR"]
         ret["adapter_num"] = cfg["ADAPTER_NUM"]
+
+        ret["use_lora"] = cfg["USE_LORA"]
+        ret["lora_targets"] = cfg["LORA_TARGETS"]
+        ret["lora_rank"] = cfg["LORA_RANK"]
+        ret["lora_alpha"] = cfg["LORA_ALPHA"]
+
         return ret
 
     def forward_features(self, features):

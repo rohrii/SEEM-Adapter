@@ -50,6 +50,10 @@ class SEEMDecoder(nn.Module):
         use_adapters: bool,
         adapter_downscale: int,
         adapter_num: int,
+        use_lora: bool,
+        lora_targets: list[str],
+        lora_rank: int,
+        lora_alpha: int,
     ):
         """
         NOTE: this interface is experimental.
@@ -93,7 +97,11 @@ class SEEMDecoder(nn.Module):
                     normalize_before=pre_norm,
                     use_adapter=use_adapters,
                     adapter_downscale=adapter_downscale,
-                    adapter_num=adapter_num
+                    adapter_num=adapter_num,
+                    use_lora=use_lora,
+                    lora_targets=lora_targets,
+                    lora_rank=lora_rank,
+                    lora_alpha=lora_alpha
                 )
             )
 
@@ -105,7 +113,11 @@ class SEEMDecoder(nn.Module):
                     normalize_before=pre_norm,
                     use_adapter=use_adapters,
                     adapter_downscale=adapter_downscale,
-                    adapter_num=adapter_num
+                    adapter_num=adapter_num,
+                    use_lora=use_lora,
+                    lora_targets=lora_targets,
+                    lora_rank=lora_rank,
+                    lora_alpha=lora_alpha
                 )
             )
 
@@ -211,6 +223,12 @@ class SEEMDecoder(nn.Module):
         ret["use_adapters"] = cfg['USE_ADAPTERS']
         ret["adapter_downscale"] = cfg["ADAPTER_DOWNSCALE_FACTOR"]
         ret["adapter_num"] = cfg["ADAPTER_NUM"]
+
+        # use lora
+        ret["use_lora"] = cfg['USE_LORA']
+        ret["lora_targets"] = cfg['LORA_TARGETS']
+        ret["lora_rank"] = cfg['LORA_RANK']
+        ret["lora_alpha"] = cfg['LORA_ALPHA']
 
         return ret
 

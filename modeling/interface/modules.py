@@ -3,6 +3,7 @@ from typing import Optional
 import torch
 from torch import nn, Tensor
 from torch.nn import functional as F
+import loratorch as lora
 
 from timm.models.layers import trunc_normal_
 from detectron2.layers import Conv2d
@@ -18,11 +19,20 @@ from ..utils import MultiheadAttention
 
 class SelfAttentionLayer(nn.Module):
 
-    def __init__(self, d_model, nhead, dropout=0.0,
-                 activation="relu", normalize_before=False,
-                 use_adapter=False, adapter_downscale=4, adapter_num=1):
+    def __init__(
+            self, d_model, nhead, dropout=0.0,
+            activation="relu", normalize_before=False,
+            use_adapter=False, adapter_downscale=4, adapter_num=1,
+            use_lora=False, lora_targets=[], lora_rank=8, lora_alpha=1,
+        ):
         super().__init__()
-        self.self_attn = MultiheadAttention(d_model, nhead, dropout=dropout)
+
+        if use_lora:
+            self.self_attn = lora.MultiheadAttention(
+                d_model, nhead, enable_lora=lora_targets, r=lora_rank, lora_alpha=lora_alpha, dropout=dropout
+            )
+        else:
+            self.self_attn = nn.MultiheadAttention(d_model, nhead, dropout=dropout)
 
         self.norm = nn.LayerNorm(d_model)
         self.dropout = nn.Dropout(dropout)
@@ -38,8 +48,8 @@ class SelfAttentionLayer(nn.Module):
         self._reset_parameters()
     
     def _reset_parameters(self):
-        for p in self.parameters():
-            if p.dim() > 1:
+        for name, p in self.named_parameters():
+            if p.dim() > 1 and "lora_" not in name:
                 nn.init.xavier_uniform_(p)
 
     def with_pos_embed(self, tensor, pos: Optional[Tensor]):
@@ -90,11 +100,20 @@ class SelfAttentionLayer(nn.Module):
 
 class CrossAttentionLayer(nn.Module):
 
-    def __init__(self, d_model, nhead, dropout=0.0,
-                 activation="relu", normalize_before=False,
-                 use_adapter=False, adapter_downscale=4, adapter_num=1):
+    def __init__(
+            self, d_model, nhead, dropout=0.0,
+            activation="relu", normalize_before=False,
+            use_adapter=False, adapter_downscale=4, adapter_num=1,
+            use_lora=False, lora_targets=[], lora_rank=8, lora_alpha=1,
+        ):
         super().__init__()
-        self.multihead_attn = nn.MultiheadAttention(d_model, nhead, dropout=dropout)
+
+        if use_lora:
+            self.multihead_attn = lora.MultiheadAttention(
+                d_model, nhead, enable_lora=lora_targets, r=lora_rank, lora_alpha=lora_alpha, dropout=dropout
+            )
+        else:
+            self.multihead_attn = nn.MultiheadAttention(d_model, nhead, dropout=dropout)
 
         self.norm = nn.LayerNorm(d_model)
         self.dropout = nn.Dropout(dropout)
@@ -110,8 +129,8 @@ class CrossAttentionLayer(nn.Module):
         self._reset_parameters()
     
     def _reset_parameters(self):
-        for p in self.parameters():
-            if p.dim() > 1:
+        for name, p in self.named_parameters():
+            if p.dim() > 1 and "lora_" not in name:
                 nn.init.xavier_uniform_(p)
 
     def with_pos_embed(self, tensor, pos: Optional[Tensor]):

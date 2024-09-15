@@ -16,6 +16,7 @@ import torch.nn.functional as F
 from torch import Tensor, nn
 from transformers.adapters import AdapterConfig
 from transformers.adapters.modeling import Adapter
+import loratorch as lora
 
 from modeling.modules.seem_adapter import SeemAdapter
 
@@ -167,10 +168,20 @@ class TransformerEncoderLayer(nn.Module):
         use_adapter=False,
         adapter_downscale=4,
         adapter_num=1,
+        use_lora=False,
+        lora_targets=[],
+        lora_rank=8,
+        lora_alpha=1,
     ):
         super().__init__()
         self.use_adapter = use_adapter
-        self.self_attn = nn.MultiheadAttention(d_model, nhead, dropout=dropout)
+
+        if use_lora:
+            self.self_attn = lora.MultiheadAttention(
+                d_model, nhead, enable_lora=lora_targets, r=lora_rank, lora_alpha=lora_alpha, dropout=dropout
+            )
+        else:
+            self.self_attn = nn.MultiheadAttention(d_model, nhead, dropout=dropout)
 
         if use_adapter:
             self.pixel_decoder_self_attention_adapter = SeemAdapter(d_model=d_model, reduction=adapter_downscale, num_adapters=adapter_num)

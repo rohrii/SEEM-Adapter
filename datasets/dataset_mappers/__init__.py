@@ -1,4 +1,4 @@
-from .coco_panoptic_interactive_dataset_mapper import COCOPanopticInteractiveDatasetMapper
+# from .coco_panoptic_interactive_dataset_mapper import COCOPanopticInteractiveDatasetMapper
 from .coco_instance_new_baseline_dataset_mapper import COCOInstanceNewBaselineDatasetMapper
 from .coco_panoptic_new_baseline_dataset_mapper import COCOPanopticNewBaselineDatasetMapper
 from .mask_former_instance_dataset_mapper import MaskFormerInstanceDatasetMapper
@@ -15,3 +15,4 @@ from .pascalvoc_dataset_mapper_ix import PascalVOCSegDatasetMapperIX
 from .dolphin_dataset_mapper import DolphinDatasetMapper
 from .zerowaste_dataset_mapper import ZerowasteDatasetMapper
 from .xray_waste_dataset_mapper import XrayWasteDatasetMapper
+from .cityscapes_dataset_mapper import CityscapesDatasetMapper

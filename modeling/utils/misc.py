@@ -197,7 +197,7 @@ def get_class_names(name):
         return PASCAL_CLASSES + ["background"]
     elif name == 'cityscapes_fine_sem_seg_val':
         return CITYSCAPES + ["background"]
-    elif name == 'cityscapes_fine_instance_seg_val':
+    elif 'cityscapes' in name:
         return CITYSCAPES_THING + ["background"]
     elif name in ['cityscapes_fine_panoptic_val']:
         return CITYSCAPES + ["background"]

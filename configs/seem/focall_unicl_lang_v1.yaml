@@ -14,17 +14,24 @@ CHECKPOINT_EVERY_EPOCH: 5
 
 # Resume Logistic
 RESUME: false
-WEIGHT: false
+WEIGHT: ''
 RESUME_FROM: ''
 EVAL_AT_START: False
 
 # Adapter config
-USE_ADAPTERS: True
+USE_ADAPTERS: False
 ADAPTER_DOWNSCALE_FACTOR: 4
 ADAPTER_NUM: 2
 
+# LoRA config
+USE_LORA: False
+LORA_TARGETS: ['q', 'v']
+LORA_RANK: 8
+LORA_ALPHA: 8
+
 # Logging and Debug
 WANDB: False
+WANDB_EXP_NAME: 'SEEM-Adapter'
 LOG_EVERY: 100
 FIND_UNUSED_PARAMETERS: false
 
@@ -335,6 +342,19 @@ XRAY_WASTE:
   DATASET:
     DATASET: 'coco'
 
+CITY:
+  INPUT:
+    IMAGE_SIZE: 1024
+    MIN_SCALE: 0.9
+    MAX_SCALE: 2.0
+    DATASET_MAPPER_NAME: "cityscapes"
+    SIZE_DIVISIBILITY: 32
+    RANDOM_FLIP: "horizontal"
+    MASK_FORMAT: "polygon"
+    FORMAT: "RGB"
+  DATASET:
+    DATASET: 'coco'
+
 # Validation dataset
 ADE20K:
   INPUT:
@@ -447,9 +467,7 @@ SOLVER:
   # ONLY DECODER
   # IGNORE_FIX: ['predictor']
   # ONLY EMBEDDING
-  # IGNORE_FIX: ['class_embed', 'mask_embed']
-  # ADAPTERS
-  IGNORE_FIX: ['class_embed', 'mask_embed', 'pixel_decoder_self_attention_adapter', 'decoder_self_attention_adapter', 'decoder_cross_attention_adapter']
+  IGNORE_FIX: ['class_embed', 'mask_embed']
   # FULL HEAD
   # IGNORE_FIX: ['sem_seg_head']
   WEIGHT_DECAY_NORM: 0.0

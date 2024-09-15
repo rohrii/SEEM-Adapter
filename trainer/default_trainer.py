@@ -204,8 +204,16 @@ class DefaultTrainer(UtilsTrainer, DistributedTrainer):
         self._initialize_ddp()
 
         if self.opt.get('WEIGHT', False):
-            self.load_weight(self.opt['RESUME_FROM'], must_exist=True)
+            logger.info(f"Loading weights from {self.opt['WEIGHT']}")
+            self.load_weight(self.opt['WEIGHT'], must_exist=True)
+
         if self.opt.get('RESUME', False):
+            if self.opt["SOLVER"].get("IGNORE_FIX", []):
+                logger.info(f"Loading base weights from {self.opt['WEIGHT']}")
+                # Load the base weights first if this is a fine-tuning run
+                self.load_weight(self.opt['WEIGHT'], must_exist=True)
+            
+            logger.info(f"Loading checkpoint weights from {self.opt['RESUME_FROM']}")
             self.load_checkpoint(self.opt['RESUME_FROM'], must_exist=True)
 
         ######################

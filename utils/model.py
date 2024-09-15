@@ -28,13 +28,14 @@ def register_norm_module(cls):
     NORM_MODULES.append(cls)
     return cls
 
-def align_and_update_state_dicts(model_state_dict, ckpt_state_dict):
+def align_and_update_state_dicts(model_state_dict, ckpt_state_dict, ignore_fix=[]):
     model_keys = sorted(model_state_dict.keys())
     ckpt_keys = sorted(ckpt_state_dict.keys())
     result_dicts = {}
-    matched_log = []
-    unmatched_log = []
-    unloaded_log = []
+
+    unmatched = []
+    unloaded = []
+    
     for model_key in model_keys:
         model_weight = model_state_dict[model_key]
         if model_key in ckpt_keys:
@@ -42,19 +43,25 @@ def align_and_update_state_dicts(model_state_dict, ckpt_state_dict):
             if model_weight.shape == ckpt_weight.shape:
                 result_dicts[model_key] = ckpt_weight
                 ckpt_keys.pop(ckpt_keys.index(model_key))
-                # matched_log.append("Loaded {}, Model Shape: {} <-> Ckpt Shape: {}".format(model_key, model_weight.shape, ckpt_weight.shape))
             else:
-                unmatched_log.append("*UNMATCHED* {}, Model Shape: {} <-> Ckpt Shape: {}".format(model_key, model_weight.shape, ckpt_weight.shape))
+                unmatched.append("*UNMATCHED* {}, Model Shape: {} <-> Ckpt Shape: {}".format(model_key, model_weight.shape, ckpt_weight.shape))
         else:
-            unloaded_log.append("*UNLOADED* {}, Model Shape: {}".format(model_key, model_weight.shape))
+            unloaded.append(model_key)
+
+    if unloaded:
+        # Suppress warnings about missing tunable keys
+        missing = unloaded.copy()
+    
+        for key in missing:
+            for ignore in ignore_fix:
+                if ignore in key:
+                    unloaded.remove(key)
             
     if is_main_process():
-        for info in matched_log:
-            logger.info(info)
-        for info in unloaded_log:
-            logger.warning(info)
+        for key in unloaded:
+            logger.warning("*UNLOADED* {}".format(key))
         for key in ckpt_keys:
             logger.warning("$UNUSED$ {}, Ckpt Shape: {}".format(key, ckpt_state_dict[key].shape))
-        for info in unmatched_log:
+        for info in unmatched:
             logger.warning(info)
     return result_dicts
