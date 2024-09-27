@@ -190,6 +190,9 @@ class XDecoderPipeline:
 
             if is_main_process():
                 scores["{}/{}".format(dataset_label, eval_type)] = results
+                
+                compute_time_str = "{} --- Compute time (MS): {:.3f}\n\n\n".format(self._opt["WANDB_EXP_NAME"], (total_compute_time / (total - num_warmup)) * 1000)
+                logger.info(compute_time_str)
 
         # set back to training stat.
         model.model.sem_seg_head.num_classes = self._opt['MODEL']['ENCODER']['NUM_CLASSES']

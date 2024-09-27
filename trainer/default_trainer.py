@@ -70,11 +70,14 @@ class DefaultTrainer(UtilsTrainer, DistributedTrainer):
             self.raw_models[module_name].to(self.opt['device'])
 
         # load model during evaluation
-        if self.opt['WEIGHT'] and os.path.isfile(self.opt['RESUME_FROM']):
-            model_path = self.opt['RESUME_FROM'] 
-            self.load_model(model_path)
-        else:
-            raise ValueError(f"Model not found: {model_path}")
+        if os.path.isfile(self.opt["WEIGHT"]):
+            logger.info(f"Loading base weights from {self.opt['WEIGHT']}")
+            # Load the base weights first if this is a fine-tuning run
+            self.load_model(self.opt['WEIGHT'])
+            
+        if os.path.isfile(self.opt['RESUME_FROM']):
+            logger.info(f"Loading tuned weights from {self.opt['RESUME_FROM']}")
+            self.load_model(self.opt['RESUME_FROM'])
 
         results = self._eval_on_set(self.save_folder)
         return results
@@ -313,3 +316,4 @@ class DefaultTrainer(UtilsTrainer, DistributedTrainer):
             logger.info(f"This epoch takes {datetime.now() - epoch_start_time}")
             logger.info(f"PROGRESS: {100.0 * (epoch + 1) / num_epochs:.2f}%")
             logger.info(f"Config files are at {self.opt['conf_files']}")
+        self.save_checkpoint(self.train_params['num_updates'])
