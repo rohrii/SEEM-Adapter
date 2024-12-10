@@ -1,6 +1,8 @@
 # 👀*SEEM:* Segment Everything Everywhere All at Once Adapter
 
-This is the repository to fine-tune SEEM using bottleneck adapter modules.
+This is the official repository for ["Parameter-Efficient Fine-Tuning of Large Pretrained Models for Instance Segmentation Tasks"](https://www.mdpi.com/2504-4990/6/4/133)
+
+[Nermeen Abou Baker*](https://scholar.google.com/citations?user=3KL3QSsAAAAJ&hl=en), [David Rohrschneider*](https://scholar.google.com/citations?user=VmjTjOUAAAAJ&hl=de), [Uwe Handmann](https://www.handmann.net/)
 
 ### Installation
 - Install openmpi (required for mpirun):
@@ -28,6 +30,23 @@ This is the repository to fine-tune SEEM using bottleneck adapter modules.
   - SOLVER.IGNORE_FIX are the module names you want to be trainable. Adapter and LoRA weights are set trainable by default if enabled, so the don't need to be defined here.
 - Set up the wandb environment variables of .env.example by copying the file to `.env` and filling out your credentials for weights an biases
 - Start the training with `source train_adapter.sh` or `source train_lora.sh`
+
+### Citation
+To cite our work, please use the following citation:
+```
+@Article{make6040133,
+    AUTHOR = {Abou Baker, Nermeen and Rohrschneider, David and Handmann, Uwe},
+    TITLE = {Parameter-Efficient Fine-Tuning of Large Pretrained Models for Instance Segmentation Tasks},
+    JOURNAL = {Machine Learning and Knowledge Extraction},
+    VOLUME = {6},
+    YEAR = {2024},
+    NUMBER = {4},
+    PAGES = {2783--2807},
+    URL = {https://www.mdpi.com/2504-4990/6/4/133},
+    ISSN = {2504-4990},
+    DOI = {10.3390/make6040133}
+}
+```
 
 # Original Readme:
 :grapes: \[[Read our arXiv Paper](https://arxiv.org/pdf/2304.06718.pdf)\] &nbsp; :apple: \[[Try our Demo](http://semantic-sam.xyzou.net:6090/)\] 
